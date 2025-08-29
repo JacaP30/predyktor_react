@@ -14,7 +14,7 @@ from fastapi.responses import FileResponse
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-app = FastAPI()
+app = FastAPI(title="Predyktor Półmaratonu API", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -27,6 +27,16 @@ app.add_middleware(
 
 class UserText(BaseModel):
     text: str
+
+
+@app.get("/")
+async def health_check():
+    return {"status": "ok", "message": "Predyktor Półmaratonu API działa!"}
+
+
+@app.get("/health")
+async def health():
+    return {"status": "healthy"}
 
 
 def extract_user_data(user_input: str):

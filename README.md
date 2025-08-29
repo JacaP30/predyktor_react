@@ -16,23 +16,45 @@ Aplikacja do przewidywania czasu ukończenia półmaratonu na podstawie danych w
 - 📱 Responsywny design
 - 🎯 Walidacja danych
 
-## Deployment na Netlify
+## Deployment na DigitalOcean App Platform
 
 ### Automatyczny deployment:
 
-1. **Połącz z GitHub:**
-   - Wgraj kod do repozytorium GitHub
-   - Połącz Netlify z repozytorium
+1. **Wejdź na DigitalOcean:**
+   - [cloud.digitalocean.com/apps](https://cloud.digitalocean.com/apps)
+   - Kliknij "Create App"
 
-2. **Konfiguracja Netlify:**
-   - Build command: `cd frontend && npm install && npm run build`
-   - Publish directory: `frontend/build`
+2. **Konfiguracja źródła:**
+   - Wybierz GitHub
+   - Wybierz repo `predyktor_react`
+   - Branch: `main`
 
-3. **Zmienne środowiskowe:**
+3. **Ustawienia aplikacji:**
+   - **Backend:**
+     - Source Directory: `backend-deploy`
+     - Build Command: `pip install -r requirements.txt`
+     - Run Command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
+     - HTTP Port: 8080
+   
+   - **Frontend:**
+     - Source Directory: `frontend`
+     - Build Command: `npm install && npm run build`
+     - Output Directory: `build`
+
+4. **Zmienne środowiskowe:**
    ```
-   REACT_APP_API_BASE=https://your-backend-url.herokuapp.com
-   NODE_VERSION=18
+   OPENAI_API_KEY=your_openai_key
+   PORT=8080
    ```
+
+### Alternatywnie - Docker deployment:
+
+```bash
+# Build i push do DigitalOcean Container Registry
+doctl registry create your-registry
+docker build -t your-registry/backend ./backend-deploy
+docker push your-registry/backend
+```
 
 ### Backend deployment (Heroku/Railway):
 
