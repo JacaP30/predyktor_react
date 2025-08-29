@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
 import openai
-import numpy as np
+import pandas as pd
 from datetime import datetime
 from joblib import load as joblib_load
 from fastapi.staticfiles import StaticFiles
@@ -164,15 +164,12 @@ async def analyze(user_text: UserText):
     )
     plec_le = 1 if str(gender).upper().startswith('M') else 0
     
-    # Używamy numpy array zamiast pandas DataFrame
-    # Upewniamy się, że t5_min nie jest None (już sprawdziliśmy wcześniej)
-    time_5k_seconds = float(t5_min) * 60.0 if t5_min is not None else 0.0
-    
-    X = np.array([[
-        time_5k_seconds,        # Średni Czas na 5 km
-        int(birth_year_calc),   # Rocznik
-        int(plec_le)           # Płeć_LE
-    ]])
+    # Używamy pandas DataFrame (wymagane przez model PyCaret)
+    X = pd.DataFrame([{
+        'Średni Czas na 5 km': float(t5_min) * 60.0 if t5_min is not None else 0.0,
+        'Rocznik': int(birth_year_calc),
+        'Płeć_LE': int(plec_le)
+    }])
 
     pred_seconds = float(model.predict(X)[0])
     return {
