@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
 import openai
-import pandas as pd
+import numpy as np
 from datetime import datetime
 from joblib import load as joblib_load
 from fastapi.staticfiles import StaticFiles
@@ -108,7 +108,7 @@ def format_time(seconds: float) -> str:
 
 # model
 MODEL_PATH = os.path.join(
-    os.path.dirname(__file__), '..', 'model', 'app_zad_dom_9_regressor.pkl'
+    os.path.dirname(__file__), 'app_zad_dom_9_regressor.pkl'
 )
 model = joblib_load(os.path.abspath(MODEL_PATH))
 
@@ -163,11 +163,16 @@ async def analyze(user_text: UserText):
         else (datetime.now().year - int(age))
     )
     plec_le = 1 if str(gender).upper().startswith('M') else 0
-    X = pd.DataFrame([{
-        'Średni Czas na 5 km': float(t5_min) * 60.0,
-        'Rocznik': int(birth_year_calc),
-        'Płeć_LE': int(plec_le)
-    }])
+    
+    # Używamy numpy array zamiast pandas DataFrame
+    # Upewniamy się, że t5_min nie jest None (już sprawdziliśmy wcześniej)
+    time_5k_seconds = float(t5_min) * 60.0 if t5_min is not None else 0.0
+    
+    X = np.array([[
+        time_5k_seconds,        # Średni Czas na 5 km
+        int(birth_year_calc),   # Rocznik
+        int(plec_le)           # Płeć_LE
+    ]])
 
     pred_seconds = float(model.predict(X)[0])
     return {
@@ -175,7 +180,7 @@ async def analyze(user_text: UserText):
         'age': int(age),
         'birth_year': birth_year_calc,
         'gender': gender,
-        'time_5k': float(t5_min),
+        'time_5k': float(t5_min) if t5_min is not None else 0.0,
         'predicted_time_seconds': pred_seconds,
         'predicted_time_formatted': format_time(pred_seconds),
     }
