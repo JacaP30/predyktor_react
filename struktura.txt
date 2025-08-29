@@ -1,0 +1,18 @@
+zadania_domowe/predyktor_react/
+├── backend/
+│   ├── main.py              # FastAPI backend z GPT-4 i modelem PyCaret
+│   └── requirements.txt     # Zależności Python
+├── frontend/
+│   ├── src/
+│   │   ├── App.js           # React komponent w języku polskim
+│   │   ├── App.css          # Style z tłem i responsywnym designem
+│   │   └── images/
+│   │       └── background.png # Obraz tła
+│   ├── build/               # Zbudowana aplikacja React
+│   ├── .env                 # Konfiguracja API (localhost:8010)
+│   └── package.json
+├── model/
+│   └── app_zad_dom_9_regressor.pkl # Model PyCaret
+├── images/
+│   └── background.png       # Kopia obrazu tła
+└── start_prod.bat          # Skrypt uruchamiania
