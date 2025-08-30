@@ -36,3 +36,13 @@ Thumbs.db
 
 # Model files (jeśli są duże)
 # model/*.pkl
+
+# Deployment artifacts from other platforms
+Procfile
+runtime.txt
+netlify.toml
+railway.toml
+render.yaml
+Dockerfile
+docker-compose.yml
+requirements.txt  # Keep only backend-deploy/requirements.txt

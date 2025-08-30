@@ -14,7 +14,7 @@ from fastapi.responses import FileResponse
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-app = FastAPI()
+app = FastAPI(title="Predyktor Półmaratonu API", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -27,6 +27,16 @@ app.add_middleware(
 
 class UserText(BaseModel):
     text: str
+
+
+@app.get("/")
+async def health_check():
+    return {"status": "ok", "message": "Predyktor Półmaratonu API działa!"}
+
+
+@app.get("/health")
+async def health():
+    return {"status": "healthy"}
 
 
 def extract_user_data(user_input: str):
@@ -108,7 +118,7 @@ def format_time(seconds: float) -> str:
 
 # model
 MODEL_PATH = os.path.join(
-    os.path.dirname(__file__), '..', 'model', 'app_zad_dom_9_regressor.pkl'
+    os.path.dirname(__file__), 'app_zad_dom_9_regressor.pkl'
 )
 model = joblib_load(os.path.abspath(MODEL_PATH))
 
@@ -163,8 +173,10 @@ async def analyze(user_text: UserText):
         else (datetime.now().year - int(age))
     )
     plec_le = 1 if str(gender).upper().startswith('M') else 0
+    
+    # Używamy pandas DataFrame (wymagane przez model PyCaret)
     X = pd.DataFrame([{
-        'Średni Czas na 5 km': float(t5_min) * 60.0,
+        'Średni Czas na 5 km': float(t5_min) * 60.0 if t5_min is not None else 0.0,
         'Rocznik': int(birth_year_calc),
         'Płeć_LE': int(plec_le)
     }])
@@ -175,7 +187,7 @@ async def analyze(user_text: UserText):
         'age': int(age),
         'birth_year': birth_year_calc,
         'gender': gender,
-        'time_5k': float(t5_min),
+        'time_5k': float(t5_min) if t5_min is not None else 0.0,
         'predicted_time_seconds': pred_seconds,
         'predicted_time_formatted': format_time(pred_seconds),
     }

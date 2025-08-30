@@ -12,7 +12,7 @@ function App() {
     if (process.env.NODE_ENV === 'production') {
       return process.env.REACT_APP_API_BASE || 'https://your-backend-api.herokuapp.com';
     }
-    return process.env.REACT_APP_API_BASE || 'http://localhost:8011';
+    return process.env.REACT_APP_API_BASE || 'http://localhost:8010';
   };
 
   const API_BASE = getApiBase();
