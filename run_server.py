@@ -9,9 +9,7 @@ sys.path.insert(0, backend_path)
 # Zmień katalog roboczy na backend
 os.chdir(backend_path)
 
-# Importuj i uruchom aplikację
-from main import app
 import uvicorn
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8010, reload=True)  # Zmienione na port 8010
+    uvicorn.run("backend.main:app", host="127.0.0.1", port=8010, reload=True)
