@@ -39,8 +39,7 @@ Thumbs.db
 
 # Deployment artifacts from other platforms
 Procfile
-runtime.txt
-# netlify.toml (do not ignore, we commit it for Netlify build config)
+# runtime.txt (nie ignorujemy - potrzebny dla Render)
 railway.toml
 render.yaml
 Dockerfile

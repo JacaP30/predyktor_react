@@ -40,24 +40,31 @@ predyktor_react/
 ```
 Name: predyktor-backend
 Environment: Python 3
-Python Version: 3.11 (zalecane) lub 3.12
 Build Command: pip install -r backend/requirements.txt
 Start Command: cd backend && gunicorn main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT
 ```
 
-**Uwaga**: Render domyślnie używa Python 3.13, ale niektóre pakiety (jak pandas) mogą mieć problemy z kompatybilnością. Zalecamy użycie Python 3.11 lub 3.12.
+**Uwaga**: Plik `runtime.txt` w katalogu głównym automatycznie ustawia Python 3.11.9. Jeśli Render nadal używa Python 3.13, ręcznie ustaw **Python Version** na **3.11** w ustawieniach Web Service (patrz sekcja 2.4 poniżej).
 
-### 2.4 Zmienne środowiskowe
+### 2.4 Ustawienie wersji Python (jeśli potrzebne)
+Jeśli Render nadal używa Python 3.13:
+1. W dashboard Render, przejdź do swojego Web Service
+2. Kliknij **"Settings"**
+3. W sekcji **"Python Version"** wybierz **"3.11"**
+4. Kliknij **"Save Changes"**
+5. Kliknij **"Manual Deploy"** → **"Deploy latest commit"**
+
+### 2.5 Zmienne środowiskowe
 W sekcji **Environment Variables** dodaj:
 ```
 OPENAI_API_KEY = your_actual_openai_api_key_here
 ```
 
-### 2.5 Ustawienia zaawansowane
+### 2.6 Ustawienia zaawansowane
 - **Auto-Deploy**: Yes (dla automatycznych aktualizacji)
 - **Plan**: Free (dla testów) lub Starter ($7/miesiąc dla produkcji
 
-### 2.6 Wdrożenie
+### 2.7 Wdrożenie
 1. Kliknij **"Create Web Service"**
 2. Render automatycznie zbuduje i wdroży aplikację
 3. Po zakończeniu otrzymasz URL: `https://predyktor-backend.onrender.com`
