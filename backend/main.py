@@ -7,8 +7,6 @@ from dotenv import load_dotenv
 import openai
 import pandas as pd
 from datetime import datetime
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
 from starlette.middleware.gzip import GZipMiddleware
 
 load_dotenv()
@@ -32,43 +30,17 @@ app.add_middleware(
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 
-@app.middleware("http")
-async def static_cache_control_middleware(request, call_next):
-    """Ustaw Cache-Control dla zasobów statycznych build/ (długie przechowywanie dla wersjonowanych plików)."""
-    response = await call_next(request)
-    path = request.url.path
-    # Długie cache dla plików w /static (mają hashowane nazwy z buildu)
-    if path.startswith('/static/'):
-        # 1 rok cache dla wersjonowanych assetów
-        response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
-    # Krótszy cache dla index.html
-    if path == '/' or path.endswith('index.html'):
-        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
-    return response
+# Middleware dla CORS i kompresji
 
 
 class UserText(BaseModel):
     text: str
 
 
-# serwowanie builda React gdy istnieje
-BUILD_DIR = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), '..', 'frontend', 'build')
-)
-
-# Serwuj pliki statyczne z /static
-if os.path.isdir(BUILD_DIR):
-    app.mount('/static', StaticFiles(directory=os.path.join(BUILD_DIR, 'static')), name='static')
-
-
 @app.get("/")
-async def serve_frontend():
-    """Serwuj główną stronę React app"""
-    if os.path.isdir(BUILD_DIR):
-        index_path = os.path.join(BUILD_DIR, 'index.html')
-        if os.path.isfile(index_path):
-            return FileResponse(index_path)
-    return {"status": "ok", "message": "Predyktor Półmaratonu API działa!"}
+async def root():
+    """Główny endpoint API"""
+    return {"status": "ok", "message": "Predyktor Półmaratonu API działa!", "version": "1.0.0"}
 
 
 @app.get("/health")
@@ -431,18 +403,4 @@ async def analyze(user_text: UserText):
     }
 
 
-# Catch-all route dla React Router (SPA routing)
-@app.get('/{full_path:path}')
-async def serve_react_spa(full_path: str):
-    """Serwuj React app dla wszystkich nieznanych ścieżek (SPA routing)"""
-    # Nie przechwytuj API endpoints
-    if full_path.startswith('api/') or full_path in ['health', 'analyze', 'docs', 'redoc', 'openapi.json']:
-        return {"error": "Endpoint not found"}
-    
-    # Serwuj React app dla wszystkich innych ścieżek
-    if os.path.isdir(BUILD_DIR):
-        index_path = os.path.join(BUILD_DIR, 'index.html')
-        if os.path.isfile(index_path):
-            return FileResponse(index_path)
-    
-    return {"error": "Frontend not available"}
+# API endpoints only - frontend będzie na Netlify

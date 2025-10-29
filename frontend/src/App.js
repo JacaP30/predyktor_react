@@ -10,9 +10,8 @@ function App() {
   // Konfiguracja API dla różnych środowisk
   const getApiBase = () => {
     if (process.env.NODE_ENV === 'production') {
-  // When frontend is served from the backend use same origin (relative paths).
-  // If you need external API host, set REACT_APP_API_BASE in build env.
-  return process.env.REACT_APP_API_BASE || '';
+      // W produkcji używaj URL-a z Render
+      return process.env.REACT_APP_API_BASE || 'https://predyktor-backend.onrender.com';
     }
     return process.env.REACT_APP_API_BASE || 'http://localhost:8010';
   };

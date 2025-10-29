@@ -4,10 +4,10 @@ Aplikacja wykorzystująca AI (GPT-4) i model uczenia maszynowego (PyCaret) do pr
 
 ## Architektura
 
-- **Frontend**: React.js z responsywnym designem
-- **Backend**: FastAPI z integracją OpenAI GPT-4
+- **Frontend**: React.js z responsywnym designem (Netlify)
+- **Backend**: FastAPI z integracją OpenAI GPT-4 (Render)
 - **Model ML**: PyCaret regressor (scikit-learn)
-- **Deployment**: DigitalOcean App Platform
+- **Deployment**: Netlify + Render
 
 ## Funkcje
 
@@ -58,27 +58,28 @@ conda activate kurs_ai && python run_server.py
 ## Struktura plików
 
 ```
-├── backend/
+├── backend/                         # Backend dla Render
 │   ├── main.py                      # FastAPI backend
 │   ├── requirements.txt             # Zależności Python
 │   ├── app_zad_dom_9_regressor.pkl  # Model ML
-│   └── .env                         # Konfiguracja backend
-├── frontend/
+│   └── env.example                  # Przykład konfiguracji
+├── frontend/                        # Frontend dla Netlify
 │   ├── src/
 │   │   ├── App.js                   # React komponent
 │   │   ├── App.css                  # Stylowanie
 │   │   └── images/background.png    # Obraz tła
-│   ├── build/                       # Zbudowana aplikacja
-│   ├── .env                         # Konfiguracja frontend (dev)
-│   ├── .env.production              # Konfiguracja frontend (prod)
+│   ├── public/
+│   │   └── _redirects               # SPA routing dla Netlify
 │   └── package.json
-├── run_server.py                    # Skrypt uruchomieniowy
-├── start_prod.bat                   # Skrypt Windows
-└── struktura.txt                    # Dokumentacja struktury
+├── netlify.toml                     # Konfiguracja Netlify
+└── DEPLOY_NETLIFY_RENDER.md         # Instrukcja wdrożenia
 ```
 \
 ## Wdrożenie
 
-Zobacz instrukcję wdrożenia na DigitalOcean w `DEPLOY_DIGITALOCEAN.md` i krótką instrukcję w `README_DEPLOY.md`.
+Zobacz szczegółową instrukcję wdrożenia na Netlify + Render w `DEPLOY_NETLIFY_RENDER.md`.
 
-Plik `Dockerfile` w repo tworzy wielostopniowy obraz (buduje frontend i instaluje backend). Możesz zbudować obraz lokalnie i wypchnąć do DockerHub, a następnie użyć DigitalOcean App Platform do jego uruchomienia.
+### Szybki start:
+1. **Backend**: Wdróż na Render (Python, FastAPI)
+2. **Frontend**: Wdróż na Netlify (React, automatyczny build)
+3. **Konfiguracja**: Ustaw zmienne środowiskowe (OPENAI_API_KEY)

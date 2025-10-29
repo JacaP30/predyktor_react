@@ -1,7 +1,7 @@
 [build]
-  base = "predyktor_react/frontend"
+  base = "frontend"
   command = "npm install && npm run build"
-  publish = "predyktor_react/frontend/build"
+  publish = "frontend/build"
 
 # SPA routing fallback (also have _redirects in public/)
 [[redirects]]
