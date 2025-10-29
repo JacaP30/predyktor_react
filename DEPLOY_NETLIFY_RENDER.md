@@ -40,9 +40,12 @@ predyktor_react/
 ```
 Name: predyktor-backend
 Environment: Python 3
+Python Version: 3.11 (zalecane) lub 3.12
 Build Command: pip install -r backend/requirements.txt
 Start Command: cd backend && gunicorn main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT
 ```
+
+**Uwaga**: Render domyślnie używa Python 3.13, ale niektóre pakiety (jak pandas) mogą mieć problemy z kompatybilnością. Zalecamy użycie Python 3.11 lub 3.12.
 
 ### 2.4 Zmienne środowiskowe
 W sekcji **Environment Variables** dodaj:
@@ -138,6 +141,12 @@ app.add_middleware(
 1. Sprawdź logi w Render
 2. Upewnij się, że `requirements.txt` zawiera wszystkie zależności
 3. Sprawdź czy model `app_zad_dom_9_regressor.pkl` jest w folderze `backend/`
+
+### Błędy kompatybilności Python
+1. **Problem**: Błędy kompilacji pandas z Python 3.13
+   **Rozwiązanie**: W Render ustaw Python Version na 3.11 lub 3.12
+2. **Problem**: Błędy z PyCaret
+   **Rozwiązanie**: Upewnij się, że używasz kompatybilnych wersji pakietów
 
 ### Frontend nie łączy się z backendem
 1. Sprawdź URL API w `frontend/src/App.js`
