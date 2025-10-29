@@ -12,4 +12,7 @@ os.chdir(backend_path)
 import uvicorn
 
 if __name__ == "__main__":
-    uvicorn.run("backend.main:app", host="127.0.0.1", port=8010, reload=True)
+    # Po zmianie katalogu roboczego na backend, wskazanie na modul jako "main:app"
+    # jest poprawne (wcześniej próbowano importować "backend.main:app" co powodowało
+    # ModuleNotFoundError gdy katalog nie był pakietem).
+    uvicorn.run("main:app", host="127.0.0.1", port=8010, reload=True)

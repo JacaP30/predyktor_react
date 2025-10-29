@@ -10,7 +10,9 @@ function App() {
   // Konfiguracja API dla różnych środowisk
   const getApiBase = () => {
     if (process.env.NODE_ENV === 'production') {
-      return process.env.REACT_APP_API_BASE || 'https://your-backend-api.herokuapp.com';
+  // When frontend is served from the backend use same origin (relative paths).
+  // If you need external API host, set REACT_APP_API_BASE in build env.
+  return process.env.REACT_APP_API_BASE || '';
     }
     return process.env.REACT_APP_API_BASE || 'http://localhost:8010';
   };

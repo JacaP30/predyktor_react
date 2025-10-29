@@ -1,0 +1,12 @@
+[build]
+  base = "predyktor_react/frontend"
+  command = "npm install && npm run build"
+  publish = "predyktor_react/frontend/build"
+
+# SPA routing fallback (also have _redirects in public/)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+

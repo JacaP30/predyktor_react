@@ -1,0 +1,13 @@
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.env
+env/
+venv/
+.build/
+node_modules/
+frontend/node_modules/
+backend/app_zad_dom_9_regressor.pkl
+frontend/build/
+*.log
