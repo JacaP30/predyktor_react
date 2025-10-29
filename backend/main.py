@@ -257,8 +257,16 @@ def format_time(seconds: float) -> str:
 # model path
 MODEL_PATH = 'app_zad_dom_9_regressor'  # PyCaret expects name without .pkl extension
 
+# Globalna zmienna dla modelu (lazy loading)
+_model_cache = None
+
 def load_model():
-    """Załaduj wytrenowany model regresji PyCaret"""
+    """Załaduj wytrenowany model regresji PyCaret (z cache)"""
+    global _model_cache
+    
+    if _model_cache is not None:
+        return _model_cache
+        
     try:
         # Import PyCaret functions
         from pycaret.regression import load_model as pycaret_load_model
@@ -266,6 +274,7 @@ def load_model():
         # Najpierw spróbuj załadować model zapisany przez PyCaret po nazwie
         try:
             model = pycaret_load_model(MODEL_PATH)
+            _model_cache = model
             return model
         except Exception:
             # Spróbuj pliku .pkl obok pliku main.py
@@ -274,6 +283,7 @@ def load_model():
             if os.path.isfile(alt_path):
                 try:
                     model = pycaret_load_model(alt_path)
+                    _model_cache = model
                     return model
                 except Exception as e:
                     print(f"Error loading model from .pkl: {e}")

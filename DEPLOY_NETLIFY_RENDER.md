@@ -41,7 +41,7 @@ predyktor_react/
 Name: predyktor-backend
 Environment: Python 3
 Build Command: pip install -r backend/requirements.txt
-Start Command: cd backend && gunicorn main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT
+Start Command: cd backend && gunicorn main:app -w 2 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT --timeout 120 --preload
 ```
 
 **Uwaga**: Plik `.python-version` w katalogu głównym automatycznie ustawia Python 3.11.9. Jeśli Render nadal używa Python 3.13, ręcznie ustaw **Python Version** na **3.11** w ustawieniach Web Service (patrz sekcja 2.4 poniżej).
@@ -160,6 +160,14 @@ app.add_middleware(
    **Rozwiązanie**: Użyj pandas w zakresie kompatybilnym z PyCaret (>=2.1.0,<2.2.0)
 2. **Problem**: Błędy instalacji pakietów
    **Rozwiązanie**: Sprawdź logi i dostosuj wersje w requirements.txt
+
+### Timeouty workerów
+1. **Problem**: WORKER TIMEOUT podczas ładowania modelu ML
+   **Rozwiązanie**: 
+   - Zwiększ timeout w Gunicorn: `--timeout 120`
+   - Zmniejsz liczbę workerów: `-w 2`
+   - Dodaj `--preload` dla lepszej wydajności
+   - Model jest ładowany lazy (tylko przy pierwszym użyciu)
 
 ### Frontend nie łączy się z backendem
 1. Sprawdź URL API w `frontend/src/App.js`
