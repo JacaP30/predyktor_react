@@ -74,9 +74,11 @@ OPENAI_API_KEY = your_actual_openai_api_key_here
 Netlify automatycznie wykryje ustawienia z `netlify.toml`:
 ```
 Build command: npm install && npm run build
-Publish directory: frontend/build
+Publish directory: build (względem base directory)
 Base directory: frontend
 ```
+
+**Uwaga**: Gdy `base` jest ustawiony na `frontend`, ścieżka `publish` jest względna do tego katalogu, więc `build` oznacza `frontend/build`.
 
 ### 3.4 Zmienne środowiskowe (opcjonalne)
 W **Site settings** → **Environment variables**:
