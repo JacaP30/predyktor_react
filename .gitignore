@@ -39,7 +39,7 @@ Thumbs.db
 
 # Deployment artifacts from other platforms
 Procfile
-# runtime.txt (nie ignorujemy - potrzebny dla Render)
+# .python-version (nie ignorujemy - potrzebny dla Render)
 railway.toml
 render.yaml
 Dockerfile

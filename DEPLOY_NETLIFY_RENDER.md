@@ -44,7 +44,7 @@ Build Command: pip install -r backend/requirements.txt
 Start Command: cd backend && gunicorn main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT
 ```
 
-**Uwaga**: Plik `runtime.txt` w katalogu głównym automatycznie ustawia Python 3.11.9. Jeśli Render nadal używa Python 3.13, ręcznie ustaw **Python Version** na **3.11** w ustawieniach Web Service (patrz sekcja 2.4 poniżej).
+**Uwaga**: Plik `.python-version` w katalogu głównym automatycznie ustawia Python 3.11.9. Jeśli Render nadal używa Python 3.13, ręcznie ustaw **Python Version** na **3.11** w ustawieniach Web Service (patrz sekcja 2.4 poniżej).
 
 ### 2.4 Ustawienie wersji Python (jeśli potrzebne)
 Jeśli Render nadal używa Python 3.13:
@@ -154,6 +154,12 @@ app.add_middleware(
    **Rozwiązanie**: W Render ustaw Python Version na 3.11 lub 3.12
 2. **Problem**: Błędy z PyCaret
    **Rozwiązanie**: Upewnij się, że używasz kompatybilnych wersji pakietów
+
+### Konflikty zależności
+1. **Problem**: PyCaret 3.3.2 wymaga pandas < 2.2.0
+   **Rozwiązanie**: Użyj pandas w zakresie kompatybilnym z PyCaret (>=2.1.0,<2.2.0)
+2. **Problem**: Błędy instalacji pakietów
+   **Rozwiązanie**: Sprawdź logi i dostosuj wersje w requirements.txt
 
 ### Frontend nie łączy się z backendem
 1. Sprawdź URL API w `frontend/src/App.js`
