@@ -168,7 +168,7 @@ def extract_user_data(user_input: str):
     if openai.api_key:
         try:
             response = openai.chat.completions.create(
-                model="gpt-4",
+                model="gpt-4.1-nano",
                 messages=[
                     {
                         "role": "system",
@@ -203,14 +203,14 @@ def infer_gender_from_name(name: str):
     try:
         if openai.api_key:
             response = openai.chat.completions.create(
-                model="gpt-4",
+                model="gpt-4.1-nano",
                 messages=[
                     {"role": "system", "content": "Jesteś ekspertem w rozpoznawaniu płci na podstawie imion. Zwróć tylko 'M' dla mężczyzny, 'K' dla kobiety lub 'NIEZNANA' jeśli nie możesz określić płci."},
                     {"role": "user", "content": f"Imię: {name}"},
                 ],
                 temperature=0.1,
-                max_tokens=10,
-                timeout=10,
+                max_tokens=100,
+                timeout=60, # czas oczekiwania
             )
             val = (response.choices[0].message.content or '').strip().upper()
             return val if val in ['M', 'K'] else None
