@@ -178,7 +178,7 @@ def extract_user_data(user_input: str):
                 ],
                 temperature=0.1,
                 max_tokens=200,
-                timeout=25,
+                timeout=60, # czas oczekiwania 
             )
             content = response.choices[0].message.content
             if content:
