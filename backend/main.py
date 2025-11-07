@@ -16,6 +16,8 @@ if OPENAI_API_KEY:
 else:
     openai.api_key = None
 
+ENABLE_LLM = os.getenv("ENABLE_LLM", "0").strip().lower() in ("1", "true", "yes", "on")
+
 app = FastAPI(title="Predyktor Półmaratonu API", version="1.0.0")
 
 app.add_middleware(
@@ -165,10 +167,10 @@ def extract_user_data(user_input: str):
     parsed = local_parse(user_input)
 
     # Następnie (opcjonalnie) LLM – jeśli zwróci sensowny JSON, nadpisz wynik
-    if openai.api_key:
+    if openai.api_key and ENABLE_LLM:
         try:
             response = openai.chat.completions.create(
-                model="gpt-4.1-nano",
+                model="gpt-4o-mini",
                 messages=[
                     {
                         "role": "system",
@@ -178,7 +180,7 @@ def extract_user_data(user_input: str):
                 ],
                 temperature=0.1,
                 max_tokens=200,
-                timeout=60, # czas oczekiwania 
+                timeout=10, # czas oczekiwania 
             )
             content = response.choices[0].message.content
             if content:
@@ -201,16 +203,16 @@ def extract_user_data(user_input: str):
 
 def infer_gender_from_name(name: str):
     try:
-        if openai.api_key:
+        if openai.api_key and ENABLE_LLM:
             response = openai.chat.completions.create(
-                model="gpt-4.1-nano",
+                model="gpt-4o-mini",
                 messages=[
                     {"role": "system", "content": "Jesteś ekspertem w rozpoznawaniu płci na podstawie imion. Zwróć tylko 'M' dla mężczyzny, 'K' dla kobiety lub 'NIEZNANA' jeśli nie możesz określić płci."},
                     {"role": "user", "content": f"Imię: {name}"},
                 ],
                 temperature=0.1,
                 max_tokens=100,
-                timeout=60, # czas oczekiwania
+                timeout=10, # czas oczekiwania
             )
             val = (response.choices[0].message.content or '').strip().upper()
             return val if val in ['M', 'K'] else None
@@ -412,5 +414,12 @@ async def analyze(user_text: UserText):
         'predicted_time_formatted': format_time(predicted_time),
     }
 
+
+@app.on_event("startup")
+async def _preload_model():
+    try:
+        load_model()
+    except Exception as e:
+        print(f"Startup preload skipped: {e}")
 
 # API endpoints only - frontend będzie na Netlify

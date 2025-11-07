@@ -10,8 +10,8 @@ function App() {
   // Konfiguracja API dla różnych środowisk
   const getApiBase = () => {
     if (process.env.NODE_ENV === 'production') {
-      // W produkcji używaj URL-a z Render
-      return process.env.REACT_APP_API_BASE || 'https://predyktor-backend.onrender.com';
+      // W produkcji używaj URL-a z Render (domyślnie nasz backend)
+      return process.env.REACT_APP_API_BASE || 'https://predyktor-react.onrender.com';
     }
     return process.env.REACT_APP_API_BASE || 'http://localhost:8010';
   };
@@ -31,7 +31,7 @@ function App() {
 
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 25000);
+      const timeoutId = setTimeout(() => controller.abort(), 60000);
 
       const response = await fetch(`${API_BASE}/analyze`, {
         method: 'POST',
