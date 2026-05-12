@@ -1,22 +1,38 @@
 import os
 import json
-from fastapi import FastAPI
+import re
+from typing import Annotated, Optional
+
+from fastapi import FastAPI, Header
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from dotenv import load_dotenv
-import openai
+from openai import OpenAI
 import pandas as pd
 from datetime import datetime
 from starlette.middleware.gzip import GZipMiddleware
 
 load_dotenv()
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-if OPENAI_API_KEY:
-    openai.api_key = OPENAI_API_KEY
-else:
-    openai.api_key = None
+OPENAI_API_KEY = (os.getenv("OPENAI_API_KEY") or "").strip() or None
 
 ENABLE_LLM = os.getenv("ENABLE_LLM", "0").strip().lower() in ("1", "true", "yes", "on")
+
+
+def _openai_key_for_llm(request_key: Optional[str]) -> Optional[str]:
+    """Klucz z nagłówka żądania ma pierwszeństwo; inaczej klucz serwera tylko przy ENABLE_LLM."""
+    k = (request_key or "").strip()
+    if k:
+        return k
+    if ENABLE_LLM and OPENAI_API_KEY:
+        return OPENAI_API_KEY
+    return None
+
+
+def looks_like_openai_api_key(key: str) -> bool:
+    s = (key or "").strip()
+    if len(s) < 20:
+        return False
+    return bool(re.match(r"^sk-[a-zA-Z0-9_-]+$", s))
 
 app = FastAPI(title="Predyktor Półmaratonu API", version="1.0.0")
 
@@ -39,6 +55,10 @@ class UserText(BaseModel):
     text: str
 
 
+class OpenAIKeyBody(BaseModel):
+    api_key: str = Field(..., min_length=1, max_length=512)
+
+
 @app.get("/")
 async def root():
     """Główny endpoint API"""
@@ -50,17 +70,36 @@ async def health():
     return {"status": "healthy"}
 
 
+@app.post("/validate-openai-key")
+async def validate_openai_key(body: OpenAIKeyBody):
+    """Sprawdza, czy klucz OpenAI jest poprawny (lekkie wywołanie API)."""
+    key = body.api_key.strip()
+    if not looks_like_openai_api_key(key):
+        return {
+            "valid": False,
+            "error": "Nieprawidłowy format klucza. Oczekiwany format zaczyna się od sk-.",
+        }
+    try:
+        client = OpenAI(api_key=key)
+        client.models.list()
+        return {"valid": True}
+    except Exception:
+        return {
+            "valid": False,
+            "error": "Klucz został odrzucony przez OpenAI. Sprawdź uprawnienia i saldo konta.",
+        }
+
+
 @app.post('/test')
 async def test_endpoint(user_text: UserText):
     """Prosty endpoint do testowania bez AI ani ML"""
     return {"message": "Test OK", "received": user_text.text}
 
 
-def extract_user_data(user_input: str):
+def extract_user_data(user_input: str, llm_api_key: Optional[str] = None):
     """Wyciąga dane użytkownika. Zawsze próbuje lokalnego, odpornego parsera,
     a jeśli dostępny jest klucz OpenAI – dodatkowo próbuje LLM i w razie sukcesu zwraca jego wynik.
     """
-    import re
 
     def local_parse(txt: str):
         text = (txt or '').strip()
@@ -167,9 +206,10 @@ def extract_user_data(user_input: str):
     parsed = local_parse(user_input)
 
     # Następnie (opcjonalnie) LLM – jeśli zwróci sensowny JSON, nadpisz wynik
-    if openai.api_key and ENABLE_LLM:
+    if llm_api_key:
         try:
-            response = openai.chat.completions.create(
+            client = OpenAI(api_key=llm_api_key)
+            response = client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[
                     {
@@ -201,10 +241,11 @@ def extract_user_data(user_input: str):
     return parsed
 
 
-def infer_gender_from_name(name: str):
+def infer_gender_from_name(name: str, llm_api_key: Optional[str] = None):
     try:
-        if openai.api_key and ENABLE_LLM:
-            response = openai.chat.completions.create(
+        if llm_api_key:
+            client = OpenAI(api_key=llm_api_key)
+            response = client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[
                     {"role": "system", "content": "Jesteś ekspertem w rozpoznawaniu płci na podstawie imion. Zwróć tylko 'M' dla mężczyzny, 'K' dla kobiety lub 'NIEZNANA' jeśli nie możesz określić płci."},
@@ -329,12 +370,16 @@ def predict_half_marathon_time(model, gender, age, time_5k):
 
 
 @app.post('/analyze')
-async def analyze(user_text: UserText):
+async def analyze(
+    user_text: UserText,
+    x_openai_api_key: Annotated[Optional[str], Header(alias="X-OpenAI-API-Key")] = None,
+):
     text = (user_text.text or '').strip()
     if not text:
         return {"error": "Brak tekstu wejściowego"}
 
-    data = extract_user_data(text)
+    llm_key = _openai_key_for_llm(x_openai_api_key)
+    data = extract_user_data(text, llm_api_key=llm_key)
     if not data:
         return {"error": "Nie udało się przetworzyć danych. Doprecyzuj treść."}
 
@@ -347,7 +392,7 @@ async def analyze(user_text: UserText):
     if not age and birth_year:
         age = datetime.now().year - int(birth_year)
     if not gender and name:
-        gender = infer_gender_from_name(name)
+        gender = infer_gender_from_name(name, llm_api_key=llm_key)
 
     t5_min = parse_time_5k(time_5k)
 
